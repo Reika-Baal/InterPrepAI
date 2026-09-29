@@ -1,4 +1,5 @@
 import './App.css'
+import HeroGradient from './components/HeroGradient'
 
 function App() {
   return (
