@@ -63,9 +63,7 @@ function App() {
           </div>
 
           <div className="hero-visual" aria-hidden="true">
-            <div className="orb">
-              <div className="orb-core" />
-            </div>
+            <HeroGradient />
           </div>
 
           <div className="feature-strip">
