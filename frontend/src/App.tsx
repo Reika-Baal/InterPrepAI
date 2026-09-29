@@ -35,23 +35,28 @@ function App() {
             </div>
 
             <h1>
-              Prepare smarter for
-              <span> every interview.</span>
+              Prepare smarter
+              <br />
+              for <span>every interview.</span>
             </h1>
 
             <p className="hero-description">
-              Personalised interview questions, intelligent feedback and
-              structured preparation built around the role you are applying for.
+              Personalised questions. AI feedback. Real progress.
+              <br />
+              All in one place.
             </p>
 
             <div className="hero-actions">
               <button className="button button-primary button-large">
                 Get started
-                <span aria-hidden="true">→</span>
+                <span className="button-arrow" aria-hidden="true">→</span>
               </button>
 
-              <button className="button button-ghost button-large">
-                See how it works
+              <button className="watch-demo">
+        <span className="play-button" aria-hidden="true">
+          ▶
+        </span>
+                Watch demo
               </button>
             </div>
           </div>
@@ -59,6 +64,28 @@ function App() {
           <div className="hero-visual" aria-hidden="true">
             <div className="orb">
               <div className="orb-core" />
+            </div>
+          </div>
+
+          <div className="feature-strip">
+            <div className="feature-item">
+              <div className="feature-icon">▣</div>
+              <span>Tailored questions</span>
+            </div>
+
+            <div className="feature-item">
+              <div className="feature-icon">◇</div>
+              <span>AI feedback</span>
+            </div>
+
+            <div className="feature-item">
+              <div className="feature-icon">⌁</div>
+              <span>Track progress</span>
+            </div>
+
+            <div className="feature-item">
+              <div className="feature-icon">▥</div>
+              <span>Build confidence</span>
             </div>
           </div>
         </section>
