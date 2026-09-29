@@ -265,11 +265,30 @@
 }
 
 .hero-visual {
+    position: relative;
+
     display: flex;
     align-items: center;
     justify-content: center;
 
-    min-height: 600px;
+    min-height: 520px;
+
+    overflow: visible;
+}
+
+.hero-gradient {
+    position: relative;
+
+    width: min(560px, 42vw);
+    height: 560px;
+
+    border-radius: 50%;
+
+    overflow: hidden;
+
+    filter:
+            drop-shadow(0 0 70px rgba(99, 102, 241, 0.32))
+            drop-shadow(0 0 120px rgba(34, 211, 238, 0.14));
 }
 
 @media (max-width: 900px) {
@@ -299,6 +318,10 @@
 
     .hero-visual {
         min-height: 420px;
+    }
+    .hero-gradient {
+        width: min(440px, 85vw);
+        height: min(440px, 85vw);
     }
 }
 
