@@ -1,5 +1,4 @@
 import './App.css'
-import HeroGradient from './components/HeroGradient'
 
 function App() {
   return (
@@ -30,6 +29,7 @@ function App() {
         </nav>
 
         <section className="hero-section">
+
           <div className="hero-content">
             <div className="eyebrow">
               AI-powered interview preparation
@@ -63,7 +63,6 @@ function App() {
           </div>
 
           <div className="hero-visual" aria-hidden="true">
-            <HeroGradient />
           </div>
 
           <div className="feature-strip">
