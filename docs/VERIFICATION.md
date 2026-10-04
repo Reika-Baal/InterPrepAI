@@ -32,3 +32,12 @@ This verifies a local frontend demo. Authentication, cloud persistence and live 
 - Unticking a task reduces completion and refresh preserves completed tasks.
 - The practice-score ring stays independent of checklist changes.
 - Mobile overflow check passes and browser checks produce no page errors.
+
+## Artwork-based orb replacement
+
+- Detailed generated transparent PNG is used in both the shader and fallback.
+- Texture shader compiles; captures show gentle motion across time.
+- Reduced-motion preference freezes texture animation.
+- WebGL unavailable and context-loss cases show the same PNG.
+- Desktop and mobile screenshots inspected; production build passes.
+- Original jagged procedural halo and electrical contour shader removed.

@@ -1564,15 +1564,15 @@ select:focus {
     font-size: 9px;
   }
   .orb-wrap {
-    top: 288px;
-    right: calc(50% - 225px);
-    width: 450px;
-    height: 450px;
+    top: 350px;
+    right: calc(50% - 200px);
+    width: 400px;
+    height: 400px;
     opacity: 0.8;
   }
   .hero-benefits {
     grid-template-columns: repeat(2, 1fr);
-    margin-top: 315px;
+    margin-top: 380px;
     gap: 20px;
   }
   .hero-benefits > div {
