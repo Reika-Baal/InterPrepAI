@@ -9,6 +9,7 @@ import {
   Check,
   ArrowUpRight,
 } from "lucide-react";
+import EnergyOrb from "../components/EnergyOrb";
 import { Logo } from "../components/UI";
 const features = [
   {
@@ -82,7 +83,7 @@ export default function Landing() {
             </div>
           </div>
           <div className="orb-wrap" aria-hidden="true">
-            <img className="hero-orb" src="/assets/hero-orb.svg" />
+            <EnergyOrb className="hero-orb" />
             <div className="orb-caption">
               <Sparkles size={14} /> A little practice. A lot more confidence.
             </div>

@@ -1,3 +1,4 @@
+import EnergyOrb from "../components/EnergyOrb";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -13,6 +14,12 @@ import {
 } from "lucide-react";
 import { Panel, PageTitle, Ring, ArrowLink, dateLabel } from "../components/UI";
 import type { Interview, Session } from "../types";
+const planTasks = [
+  "Review the company and job description",
+  "Prepare two examples using the STAR method",
+  "Complete a focused practice session",
+];
+
 export default function Dashboard({
   interviews,
   sessions,
@@ -32,6 +39,8 @@ export default function Dashboard({
   const score = sessions.length
     ? Math.round(sessions.reduce((a, s) => a + s.score, 0) / sessions.length)
     : 0;
+  const completedTasks = planTasks.filter((_, i) => tasks[i]).length;
+  const planPercent = Math.round((completedTasks / planTasks.length) * 100);
   return (
     <>
       <PageTitle
@@ -51,7 +60,7 @@ export default function Dashboard({
             Start a session <ArrowRight size={16} />
           </Link>
         </div>
-        <img src="/assets/hero-orb.svg" alt="" />
+        <EnergyOrb className="dashboard-orb" />
       </div>
       <div className="dashboard-top-grid">
         <Panel>
@@ -99,11 +108,11 @@ export default function Dashboard({
         </Panel>
         <Panel>
           <div className="panel-heading">
-            <h2>Practice readiness</h2>
+            <h2>Practice score</h2>
             <ArrowLink to="/progress">Details</ArrowLink>
           </div>
           <div className="preparation">
-            <Ring value={score} />
+            <Ring value={score} label="Average demo practice score" />
             <div className="score-legend">
               <div>
                 <i />
@@ -112,10 +121,6 @@ export default function Dashboard({
               <div>
                 <i />
                 Sessions completed <strong>{sessions.length}</strong>
-              </div>
-              <div>
-                <i />
-                Plan completed <strong>{tasks.filter(Boolean).length}/3</strong>
               </div>
               <small>
                 {sessions.length
@@ -149,7 +154,7 @@ export default function Dashboard({
             title: "Preparation Plan",
             description: "3 small steps for your next interview.",
             detail: "Stay focused. Keep moving.",
-            meta: `${tasks.filter(Boolean).length} of 3 tasks complete`,
+            meta: `${completedTasks} of ${planTasks.length} tasks complete`,
             to: "#plan",
           },
         ].map((c) => (
@@ -189,11 +194,26 @@ export default function Dashboard({
             <h2>Your preparation plan</h2>
             <span className="badge">This week</span>
           </div>
-          {[
-            "Review the company and job description",
-            "Prepare two examples using the STAR method",
-            "Complete a focused practice session",
-          ].map((t, i) => (
+          <div className="plan-completion">
+            <div className="plan-completion-label" role="status">
+              <span>
+                Plan completed · {completedTasks}/{planTasks.length} tasks
+              </span>
+              <strong>{planPercent}%</strong>
+            </div>
+            <div
+              className="plan-progress-track"
+              role="progressbar"
+              aria-label="Preparation plan completion"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={planPercent}
+              aria-valuetext={`${completedTasks} of ${planTasks.length} tasks complete (${planPercent}%)`}
+            >
+              <span style={{ width: `${planPercent}%` }} />
+            </div>
+          </div>
+          {planTasks.map((t, i) => (
             <label key={t} className={`task ${tasks[i] ? "done" : ""}`}>
               <input
                 type="checkbox"
