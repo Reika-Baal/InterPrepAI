@@ -1904,3 +1904,45 @@ select:focus {
   background: linear-gradient(90deg, #9668ff, #666dff, #22d3ee);
   transition: width 0.25s ease;
 }
+/* Animated CSS fallback also uses no image or hard outer halo. */
+.live-orb-fallback {
+  overflow: visible;
+}
+.live-orb-fallback > span {
+  position: absolute;
+  inset: 20%;
+  border-radius: 42% 58% 65% 35%;
+  background: conic-gradient(
+    from 0deg,
+    transparent,
+    #6958ff44,
+    #b47aff99,
+    #22d3ee88,
+    transparent 75%
+  );
+  filter: blur(7px);
+  animation: ribbon-fallback 12s linear infinite;
+}
+.live-orb-fallback > span:nth-child(2) {
+  transform: rotate(110deg);
+  animation-direction: reverse;
+  animation-duration: 16s;
+}
+.live-orb-fallback > span:nth-child(3) {
+  inset: 26%;
+  animation-delay: -6s;
+}
+@keyframes ribbon-fallback {
+  0% {
+    transform: rotate(0deg) scale(0.98);
+    border-radius: 42% 58% 65% 35%;
+  }
+  50% {
+    transform: rotate(180deg) scale(1.04);
+    border-radius: 60% 40% 38% 62%;
+  }
+  100% {
+    transform: rotate(360deg) scale(0.98);
+    border-radius: 42% 58% 65% 35%;
+  }
+}

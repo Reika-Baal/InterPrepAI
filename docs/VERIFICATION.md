@@ -16,16 +16,6 @@
 
 This verifies a local frontend demo. Authentication, cloud persistence and live AI are not implemented or tested.
 
-## Energy orb update
-
-- WebGL vertex/fragment shaders compile and render in Chromium.
-- Captured canvas pixels change across time samples.
-- Reduced-motion preference freezes the captured canvas pixels.
-- Orb renders on landing, dashboard and mobile.
-- WebGL context loss and WebGL unavailable tests show the SVG fallback.
-- No JavaScript page errors during the orb checks.
-- Shader uses no downloaded textures, videos, third-party rendering package or network calls.
-
 ## Separate plan-completion bar
 
 - Task completion updates the bar through 0%, 33%, 67% and 100%.
@@ -33,11 +23,14 @@ This verifies a local frontend demo. Authentication, cloud persistence and live 
 - The practice-score ring stays independent of checklist changes.
 - Mobile overflow check passes and browser checks produce no page errors.
 
-## Artwork-based orb replacement
+## Live 3D orb replacement
 
-- Detailed generated transparent PNG is used in both the shader and fallback.
-- Texture shader compiles; captures show gentle motion across time.
-- Reduced-motion preference freezes texture animation.
-- WebGL unavailable and context-loss cases show the same PNG.
-- Desktop and mobile screenshots inspected; production build passes.
-- Original jagged procedural halo and electrical contour shader removed.
+- TypeScript and Vite production build pass. Vite reports a 521 kB lazy-loaded rendering chunk; the main entry is 301 kB.
+- Three.js vertex/fragment shaders compile and render without browser console errors.
+- Canvas screenshots differ across time samples, confirming visible animation.
+- Reduced-motion canvas screenshots remain identical across time samples.
+- Orb renders on landing, dashboard and mobile; mobile has no horizontal overflow.
+- WebGL context loss and unavailable WebGL display the CSS fallback.
+- Desktop and mobile screenshots visually inspected.
+- No orb PNG texture or static orb artwork remains in the project.
+- Included GIF records the actual browser-rendered animation.
