@@ -1946,3 +1946,18 @@ select:focus {
     border-radius: 42% 58% 65% 35%;
   }
 }
+
+.auth-page { max-width: 520px; margin: 60px auto; padding: 24px; }
+.auth-page .panel { margin-top: 32px; }
+.auth-page form { display: grid; gap: 18px; margin: 24px 0; }
+.auth-page label { display: grid; gap: 8px; }
+.assessment-details { margin-top: 24px; overflow-wrap: anywhere; }
+.assessment-details ul { padding-left: 24px; }
+.assessment-details li { margin: 8px 0; }
+.assessment-details details { margin: 24px 0; padding: 18px; background: #111626; border-radius: 14px; }
+.assessment-details summary, .discard-session summary { cursor: pointer; }
+.rubric-row { border-top: 1px solid #30344a; padding: 18px 0; }
+.rubric-row .badge { margin-left: 12px; }
+.rubric-row blockquote { margin: 12px 0; padding-left: 16px; border-left: 3px solid #8e6cff; color: #bcb8d0; }
+.discard-session { margin-top: 32px; color: #aaaec2; }
+.form-actions { flex-wrap: wrap; }

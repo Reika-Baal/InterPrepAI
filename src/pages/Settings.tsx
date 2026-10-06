@@ -11,11 +11,11 @@ export default function Settings({
   reset,
 }: {
   profile: Profile;
-  save: (p: Profile) => void;
+  save: (p: Profile) => Promise<boolean>;
   interviews: Interview[];
   sessions: Session[];
   tasks: boolean[];
-  reset: () => void;
+  reset: () => Promise<boolean>;
 }) {
   const [name, setName] = useState(profile.name);
   const [role, setRole] = useState(profile.role);
@@ -47,19 +47,19 @@ export default function Settings({
     <>
       <PageTitle
         title="Make this space yours."
-        subtitle="Your profile, preferences and local workspace data."
+        subtitle="Your profile, preferences and saved workspace data."
       />
       <Panel className="settings-panel">
         <h2>Profile</h2>
         <form
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
             const d = new FormData(e.currentTarget);
-            save({
+            const ok = await save({
               name: String(d.get("name")).trim(),
               role: String(d.get("role")).trim(),
             });
-            setSaved(true);
+            setSaved(ok);
           }}
           onChange={() => setSaved(false)}
         >
@@ -103,9 +103,9 @@ export default function Settings({
           <ShieldCheck size={20} />
         </div>
         <p>
-          This demo stores data in your browser’s local storage. There are no
-          accounts, cloud backups or AI API calls. Clearing browser data removes
-          this workspace.
+          Your workspace is saved to the backend database under your account.
+          Requesting a review sends that answer and its question rubric to
+          OpenAI. Personal stories are coached, not independently verified.
         </p>
         <button className="btn secondary" onClick={exportData}>
           <Download size={16} /> Export data
@@ -119,8 +119,8 @@ export default function Settings({
               </p>
               <button
                 className="btn danger"
-                onClick={() => {
-                  reset();
+                onClick={async () => {
+                  if (!(await reset())) return;
                   setConfirm(false);
                   setSaved(false);
                 }}

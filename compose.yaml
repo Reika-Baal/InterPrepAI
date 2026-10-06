@@ -1,0 +1,19 @@
+services:
+  app:
+    build: .
+    init: true
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3001:3001"
+    environment:
+      NODE_ENV: production
+      APP_ORIGIN: ${APP_ORIGIN:?Set HTTPS APP_ORIGIN}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:?Set OPENAI_API_KEY}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4.1-mini}
+      REGISTRATION_CODE: ${REGISTRATION_CODE:?Set REGISTRATION_CODE}
+      DAILY_ASSESSMENT_LIMIT: ${DAILY_ASSESSMENT_LIMIT:-200}
+      USER_DAILY_ASSESSMENT_LIMIT: ${USER_DAILY_ASSESSMENT_LIMIT:-30}
+    volumes:
+      - app-data:/app/server/data
+volumes:
+  app-data:

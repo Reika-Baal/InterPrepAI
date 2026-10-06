@@ -46,7 +46,7 @@ export default function Progress({
             value: sessions.reduce((n, s) => n + s.answers.length, 0),
             icon: ChartNoAxesCombined,
           },
-          { title: "Average demo score", value: `${average}%`, icon: Target },
+          { title: "Average rubric score", value: `${average}%`, icon: Target },
           {
             title: "Upcoming interviews",
             value: interviews.filter((i) => i.status === "Upcoming").length,
@@ -63,11 +63,11 @@ export default function Progress({
       <Panel>
         <div className="panel-heading">
           <h2>Practice over time</h2>
-          <span className="badge">Demo structure score</span>
+          <span className="badge">Rubric score</span>
         </div>
         <p className="muted">
-          Scores use local answer-structure rules and do not measure technical
-          accuracy.
+          Scores use question-specific rubrics. Compare sessions within the same
+          topic; these are practice scores, not a hiring prediction.
         </p>
         {data.length ? (
           <div className="chart">
@@ -112,7 +112,7 @@ export default function Progress({
                 <Area
                   type="monotone"
                   dataKey="score"
-                  name="Demo score"
+                  name="Rubric score"
                   stroke="#9277ff"
                   strokeWidth={3}
                   fill="url(#chartFill)"

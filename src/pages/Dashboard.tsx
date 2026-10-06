@@ -112,7 +112,7 @@ export default function Dashboard({
             <ArrowLink to="/progress">Details</ArrowLink>
           </div>
           <div className="preparation">
-            <Ring value={score} label="Average demo practice score" />
+            <Ring value={score} label="Average rubric score" />
             <div className="score-legend">
               <div>
                 <i />
@@ -124,7 +124,7 @@ export default function Dashboard({
               </div>
               <small>
                 {sessions.length
-                  ? "Based on demo practice reviews."
+                  ? "Based on assessed practice sessions."
                   : "Complete a session to get started."}
               </small>
             </div>

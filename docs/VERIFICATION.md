@@ -1,36 +1,17 @@
 # Verification
 
-- TypeScript check and Vite production build: passed.
-- Offline review rule tests: 3 passed.
-- Headless Chromium browser checks at 1440px and 390px: passed.
-- Landing-to-dashboard and workspace navigation: passed.
-- Interview creation, edit, completion toggle and deletion: passed.
-- Interview and profile persistence after browser refresh: passed.
-- Complete five questions, save a session and review feedback after refresh: passed.
-- Progress chart screen: loaded without browser exceptions.
-- Profile editing and saved confirmation: passed.
-- Mobile sidebar navigation: passed.
-- Mobile landing and interview screen horizontal overflow checks: passed.
-- Desktop landing, dashboard and mobile landing screenshots visually inspected.
-- No JavaScript page errors during the browser interaction checks.
+## Backend update
 
-This verifies a local frontend demo. Authentication, cloud persistence and live AI are not implemented or tested.
+- TypeScript and Vite production build pass.
+- Six automated backend/integration test groups pass with no paid API calls.
+- Coverage includes registration, duplicate account rejection, password hashing, login/logout, owner isolation, cross-origin mutation rejection, input bounds, private rubric filtering, saved drafts, server-computed scores, cached assessment reuse, invalidation after editing, idempotent completion, reset, missing key, provider failure, quota enforcement, database reopen and concurrent assessment locks.
+- Provider adapter tests verify structured requests and reject malformed, incomplete or refused responses and fabricated answer quotations.
+- The AI provider is stubbed in automated integration checks. These tests do not establish semantic grading accuracy.
+- Live grading evaluations are supplied via `npm run eval:live` but have not been run with a real API key.
+- Headless Chromium passed registration, draft save/reload, review display, five-answer completion, feedback reload, profile persistence, dashboard navigation, mobile overflow and logout with no page errors. Browser grading used a test fixture, clearly labelled in the included screenshots.
+- Desktop review screenshot visually inspected.
+- Docker deployment has not been run. No hosted service has been deployed.
 
-## Separate plan-completion bar
+## Existing animated orb
 
-- Task completion updates the bar through 0%, 33%, 67% and 100%.
-- Unticking a task reduces completion and refresh preserves completed tasks.
-- The practice-score ring stays independent of checklist changes.
-- Mobile overflow check passes and browser checks produce no page errors.
-
-## Live 3D orb replacement
-
-- TypeScript and Vite production build pass. Vite reports a 521 kB lazy-loaded rendering chunk; the main entry is 301 kB.
-- Three.js vertex/fragment shaders compile and render without browser console errors.
-- Canvas screenshots differ across time samples, confirming visible animation.
-- Reduced-motion canvas screenshots remain identical across time samples.
-- Orb renders on landing, dashboard and mobile; mobile has no horizontal overflow.
-- WebGL context loss and unavailable WebGL display the CSS fallback.
-- Desktop and mobile screenshots visually inspected.
-- No orb PNG texture or static orb artwork remains in the project.
-- Included GIF records the actual browser-rendered animation.
+The Three.js ribbon/particle scene is retained. Previous rendering checks covered moving pixels, reduced motion, dashboard/mobile rendering and the CSS fallback. The lazy rendering chunk remains approximately 521 kB and produces a Vite size warning; it is loaded separately from the main app.

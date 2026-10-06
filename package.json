@@ -4,26 +4,37 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently -k \"npm:dev:api\" \"npm:dev:web\"",
     "build": "tsc -b && vite build",
-    "preview": "vite preview",
-    "test": "node --test tests/*.test.mjs"
+    "test": "node --test server/tests/*.test.mjs",
+    "dev:web": "vite --host localhost --port 5173 --strictPort",
+    "dev:api": "node --env-file-if-exists=.env --watch server/index.mjs",
+    "start": "node --env-file-if-exists=.env server/index.mjs",
+    "eval:live": "node --env-file-if-exists=.env scripts/eval-live.mjs"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.0",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.7.1",
+    "helmet": "^8.3.0",
     "lucide-react": "^0.468.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.9.0",
     "recharts": "^3.2.0",
-    "three": "^0.186.1"
+    "three": "^0.186.1",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@types/three": "^0.186.0",
     "@vitejs/plugin-react": "^5.0.0",
+    "concurrently": "^10.0.5",
     "typescript": "~5.9.3",
     "vite": "^7.1.0"
+  },
+  "engines": {
+    "node": ">=24 <25"
   }
 }

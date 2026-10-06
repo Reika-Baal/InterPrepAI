@@ -1,8 +1,8 @@
 import { lazy, Suspense } from "react";
-import { Routes, Route, Link } from "react-router-dom";
-import { useLocalStorage } from "./useLocalStorage";
-import { initialInterviews } from "./data";
-import type { Interview, Session, Profile } from "./types";
+import { Routes, Route, Link, useLocation } from "react-router-dom";
+import { useBackend } from "./useBackend";
+import Auth from "./pages/Auth";
+import type { Interview } from "./types";
 import Layout from "./components/Layout";
 import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
@@ -12,34 +12,46 @@ import Feedback from "./pages/Feedback";
 const Progress = lazy(() => import("./pages/Progress"));
 import Settings from "./pages/Settings";
 export default function App() {
-  const [interviews, setInterviews, interviewError] = useLocalStorage<
-    Interview[]
-  >("interprepai.interviews.v1", initialInterviews);
-  const [sessions, setSessions, sessionError] = useLocalStorage<Session[]>(
-    "interprepai.sessions.v1",
-    [],
-  );
-  const [profile, setProfile, profileError] = useLocalStorage<Profile>(
-    "interprepai.profile.v1",
-    { name: "Pratik", role: "Graduate Software Engineer" },
-  );
-  const [tasks, setTasks, taskError] = useLocalStorage<boolean[]>(
-    "interprepai.tasks.v1",
-    [false, false, false],
-  );
-  const saveInterview = (i: Interview) =>
-    setInterviews((prev) =>
-      prev.some((x) => x.id === i.id)
-        ? prev.map((x) => (x.id === i.id ? i : x))
-        : [...prev, i],
+  const backend = useBackend();
+  const location = useLocation();
+  const {
+    workspace: { interviews, profile, tasks },
+    sessions,
+    setSessions,
+  } = backend;
+  if (location.pathname !== "/" && backend.status !== "ready") {
+    if (backend.status === "auth") return <Auth onSuccess={backend.load} />;
+    return (
+      <div className="empty-state">
+        <h2>
+          {backend.status === "loading"
+            ? "Loading your workspace…"
+            : "Unable to load workspace"}
+        </h2>
+        <p role="alert">{backend.error}</p>
+        {backend.status === "error" && (
+          <button className="btn primary" onClick={() => void backend.load()}>
+            Retry connection
+          </button>
+        )}
+      </div>
     );
-  const removeInterview = (id: string) =>
-    setInterviews((prev) => prev.filter((i) => i.id !== id));
-  const reset = () => {
-    setInterviews([]);
-    setSessions([]);
-    setProfile({ name: "Your name", role: "" });
-    setTasks([false, false, false]);
+  }
+  const saveInterview = (i: Interview) => {
+    const w = backend.current.current;
+    void backend.update({
+      ...w,
+      interviews: w.interviews.some((x) => x.id === i.id)
+        ? w.interviews.map((x) => (x.id === i.id ? i : x))
+        : [...w.interviews, i],
+    });
+  };
+  const removeInterview = (id: string) => {
+    const w = backend.current.current;
+    void backend.update({
+      ...w,
+      interviews: w.interviews.filter((i) => i.id !== id),
+    });
   };
   return (
     <Routes>
@@ -48,9 +60,9 @@ export default function App() {
         element={
           <Layout
             name={profile.name}
-            storageError={
-              interviewError || sessionError || profileError || taskError
-            }
+            storageError={backend.error}
+            retry={() => void backend.retry()}
+            logout={() => void backend.logout()}
           />
         }
       >
@@ -63,7 +75,12 @@ export default function App() {
               name={profile.name}
               tasks={tasks}
               toggleTask={(i) =>
-                setTasks((prev) => prev.map((v, j) => (i === j ? !v : v)))
+                void backend.update({
+                  ...backend.current.current,
+                  tasks: backend.current.current.tasks.map((v, j) =>
+                    i === j ? !v : v,
+                  ),
+                })
               }
             />
           }
@@ -91,7 +108,11 @@ export default function App() {
         <Route
           path="/practice"
           element={
-            <Practice save={(s) => setSessions((prev) => [s, ...prev])} />
+            <Practice
+              save={(s) =>
+                setSessions((prev) => [s, ...prev.filter((x) => x.id !== s.id)])
+              }
+            />
           }
         />
         <Route path="/feedback" element={<Feedback sessions={sessions} />} />
@@ -114,11 +135,13 @@ export default function App() {
           element={
             <Settings
               profile={profile}
-              save={setProfile}
+              save={(profile) =>
+                backend.update({ ...backend.current.current, profile })
+              }
               interviews={interviews}
               sessions={sessions}
               tasks={tasks}
-              reset={reset}
+              reset={backend.reset}
             />
           }
         />

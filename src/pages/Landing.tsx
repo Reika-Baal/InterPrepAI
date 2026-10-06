@@ -40,7 +40,7 @@ export default function Landing() {
         </nav>
         <div className="nav-actions">
           <Link className="btn secondary" to="/dashboard">
-            Explore demo
+            Open workspace
           </Link>
           <Link className="btn primary" to="/dashboard">
             Get started <ArrowUpRight size={16} />
@@ -160,7 +160,7 @@ export default function Landing() {
             <div>
               <div className="section-label">START WHERE YOU ARE</div>
               <h2>Your preparation, all in one place.</h2>
-              <p>This local demo is free to explore. No account required.</p>
+              <p>Create an account to save your practice and progress.</p>
               <div className="pricing-points">
                 <span>
                   <Check size={16} /> Interview planner

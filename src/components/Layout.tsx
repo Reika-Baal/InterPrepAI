@@ -24,9 +24,13 @@ const links = [
 export default function Layout({
   name,
   storageError,
+  retry,
+  logout,
 }: {
   name: string;
-  storageError: boolean;
+  storageError: string;
+  retry: () => void;
+  logout: () => void;
 }) {
   const [open, setOpen] = useState(false);
   return (
@@ -74,10 +78,13 @@ export default function Layout({
           </span>
           <div>
             <strong>{name || "Your profile"}</strong>
-            <small>Local demo workspace</small>
+            <small>Connected workspace</small>
           </div>
           <Settings size={16} />
         </Link>
+        <button className="text-link" onClick={logout}>
+          Sign out
+        </button>
       </aside>
       <main className="workspace-main">
         <div className="workspace-top">
@@ -90,8 +97,10 @@ export default function Layout({
         </div>
         {storageError && (
           <p className="notice" role="alert">
-            Browser storage is unavailable. Changes are only kept until this
-            page closes.
+            {storageError}{" "}
+            <button className="btn secondary" onClick={retry}>
+              Retry save
+            </button>
           </p>
         )}
         <Outlet />
