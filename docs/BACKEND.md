@@ -22,6 +22,7 @@ All mutation requests require `Content-Type: application/json` and `Origin` matc
 | --- | --- | --- |
 | GET | /api/health | Availability and whether AI is configured |
 | POST | /api/auth/register | name, email, password, confirmPassword, optional accessCode |
+| POST | /api/auth/guest | Create or reuse an isolated guest workspace |
 | POST | /api/auth/login | email and password |
 | POST | /api/auth/logout | Revoke current session |
 | GET/PUT | /api/workspace | Read state / save profile, interviews, tasks |
@@ -58,7 +59,7 @@ A Dockerfile and compose file are provided as a packaging option. Set production
 
 Stop the server cleanly and back up the entire directory containing the SQLite file, including any WAL/SHM files. Restore to the same configured DATABASE_PATH and start the server. Keep backups private: answers and profile data are not encrypted at rest by this app. Export data in Settings provides a per-account JSON download, but there is no import endpoint yet.
 
-Question seeds upsert on startup. Schema version 1 is recorded using PRAGMA user_version. Future schema changes require explicit migrations and backup testing.
+Question seeds upsert on startup. Schema version 2 is recorded using PRAGMA user_version. Future schema changes require explicit migrations and backup testing.
 
 ## Known limits
 
@@ -78,3 +79,10 @@ Registration requires name, password and confirmPassword. Both the form and API 
 The supplied list of 20 common passwords is checked first, ignoring case and outer whitespace, so these inputs receive exactly `Password is too common`. This is an exact blocklist, not a comprehensive dictionary or a check for every possible variation. Name matching ignores case and punctuation and checks the full name and name parts of two or more characters; individual initials in multi-part names are ignored. The supplied registration name becomes the initial profile name. This check uses the user's supplied name, not independently verified identity.
 
 New registration rules are not applied during sign-in, so existing accounts keep working. Profile name edits do not retroactively validate an existing password. No schema migration or password reset is required.
+
+
+## Guest identities
+
+`POST /api/auth/guest` accepts an empty JSON object, shares the existing authentication rate limiter, and requires the configured request origin. It is intentionally available without the registration invitation code. Each guest receives a unique internal user and the same secure cookie and ownership checks as a registered user. Guest users cannot sign in through the email/password endpoint. Repeated entry with a valid session reuses that identity; it does not replace a signed-in account.
+
+The additive `guest_users` table records guest expiry and is created automatically for existing databases; no existing account data is rewritten. Expired guest users, auth sessions and practice sessions are deleted on subsequent guest creation, skipping active assessments. The guest marker is independent of the editable profile name. Per-user and global AI quotas apply to guests, so publicly enabling this app also makes the existing AI quota available to anonymous visitors. Cookie clearing can create a new guest identity, but cannot bypass the global quota or IP request limiter. Guest data is not merged into registered accounts.

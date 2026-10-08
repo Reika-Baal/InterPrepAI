@@ -23,11 +23,13 @@ const links = [
 ];
 export default function Layout({
   name,
+  isGuest,
   storageError,
   retry,
   logout,
 }: {
   name: string;
+  isGuest: boolean;
   storageError: string;
   retry: () => void;
   logout: () => void;
@@ -78,12 +80,12 @@ export default function Layout({
           </span>
           <div>
             <strong>{name || "Your profile"}</strong>
-            <small>Connected workspace</small>
+            <small>{isGuest ? "Guest workspace" : "Connected workspace"}</small>
           </div>
           <Settings size={16} />
         </Link>
         <button className="text-link" onClick={logout}>
-          Sign out
+          {isGuest ? "End guest session" : "Sign out"}
         </button>
       </aside>
       <main className="workspace-main">

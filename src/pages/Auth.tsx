@@ -123,6 +123,29 @@ export default function Auth({
           </button>
         </form>
         <button
+          type="button"
+          className="btn secondary guest-entry"
+          disabled={busy}
+          onClick={async () => {
+            setBusy(true);
+            setError("");
+            try {
+              await api("/auth/guest", "POST", {});
+              await onSuccess();
+            } catch (e) {
+              setError((e as Error).message);
+            } finally {
+              setBusy(false);
+            }
+          }}
+        >
+          Continue as guest
+        </button>
+        <p className="muted guest-help">
+          Access all features without an account. Guest progress is available in
+          this browser for up to 7 days, unless you sign out or clear cookies.
+        </p>
+        <button
           className="text-link"
           onClick={() => {
             setRegister(!register);

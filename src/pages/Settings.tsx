@@ -4,6 +4,7 @@ import { Panel, PageTitle } from "../components/UI";
 import type { Profile, Interview, Session } from "../types";
 export default function Settings({
   profile,
+  isGuest,
   save,
   interviews,
   sessions,
@@ -11,6 +12,7 @@ export default function Settings({
   reset,
 }: {
   profile: Profile;
+  isGuest: boolean;
   save: (p: Profile) => Promise<boolean>;
   interviews: Interview[];
   sessions: Session[];
@@ -103,7 +105,9 @@ export default function Settings({
           <ShieldCheck size={20} />
         </div>
         <p>
-          Your workspace is saved to the backend database under your account.
+          {isGuest
+            ? "You are using a guest workspace. It is available through this browser for up to 7 days. Ending your guest session or clearing cookies removes access to this data. Export anything you want to keep before leaving."
+            : "Your workspace is saved to the backend database under your account."}
           Requesting a review sends that answer and its question rubric to
           OpenAI. Personal stories are coached, not independently verified.
         </p>

@@ -3,7 +3,7 @@
 ## Backend update
 
 - TypeScript and Vite production build pass.
-- Nine automated backend/integration test groups pass with no paid API calls.
+- Eleven automated backend/integration test groups pass with no paid API calls.
 - Coverage includes registration, duplicate account rejection, password hashing, login/logout, owner isolation, cross-origin mutation rejection, input bounds, private rubric filtering, saved drafts, server-computed scores, cached assessment reuse, invalidation after editing, idempotent completion, reset, missing key, provider failure, quota enforcement, database reopen and concurrent assessment locks.
 - Provider adapter tests verify structured requests and reject malformed, incomplete or refused responses and fabricated answer quotations.
 - The AI provider is stubbed in automated integration checks. These tests do not establish semantic grading accuracy.
@@ -23,3 +23,12 @@ The Three.js ribbon/particle scene is retained. Previous rendering checks covere
 - API checks reject bypassed client validation; existing passwords remain valid for sign-in.
 - Chromium form checks pass for all validation messages, mismatched confirmation, seven-character registration and subsequent sign-in.
 - Registration screenshot visually inspected.
+
+
+## Guest access update
+
+- Guest entry requires no credentials and provides an isolated server workspace.
+- Backend tests cover all workspace capabilities, guest ownership isolation, repeated-entry reuse, configured registration-code independence, assessment quotas, sign-out and expired guest cleanup.
+- Existing registered sessions remain registered when the guest entry endpoint is called.
+- Chromium checks pass for guest entry, saved draft reload, five reviews and completion, feedback reload, profile updates, interviews, progress, dashboard, mobile layout and exit. The AI provider is stubbed in these checks.
+- Guest entry screenshot visually inspected; production build passes.

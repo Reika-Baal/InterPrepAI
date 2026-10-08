@@ -153,6 +153,52 @@ export function createApp({
       path: "/",
     });
   }
+  function currentUser(req) {
+    return db
+      .prepare(
+        `SELECT users.*, EXISTS(SELECT 1 FROM guest_users WHERE user_id=users.id) AS isGuest
+      FROM auth JOIN users ON users.id=auth.user_id WHERE token=? AND auth.expires>?`,
+      )
+      .get(hashToken(getToken(req)), Date.now());
+  }
+  app.post("/api/auth/guest", authLimit, (req, res) => {
+    z.object({}).strict().parse(req.body);
+    // Retry in the same browser preserves the active identity and its progress.
+    const existing = currentUser(req);
+    if (existing) return res.json({ isGuest: !!existing.isGuest });
+    const expired = db
+      .prepare("SELECT user_id FROM guest_users WHERE expires<?")
+      .all(Date.now());
+    for (const { user_id } of expired) {
+      if (![...inFlight.keys()].some((key) => key.startsWith(user_id + ":"))) {
+        db.prepare("DELETE FROM users WHERE id=?").run(user_id);
+        db.prepare("DELETE FROM usage WHERE scope=?").run(user_id);
+      }
+    }
+    const id = randomUUID();
+    db.exec("BEGIN");
+    try {
+      db.prepare("INSERT INTO users VALUES(?,?,?,?)").run(
+        id,
+        `guest-${id}@guest.invalid`,
+        `${randomBytes(16).toString("hex")}:${randomBytes(64).toString("hex")}`,
+        JSON.stringify({
+          ...emptyWorkspace(),
+          profile: { name: "Guest", role: "" },
+        }),
+      );
+      db.prepare("INSERT INTO guest_users VALUES(?,?)").run(
+        id,
+        Date.now() + 7 * 86400000,
+      );
+      setLogin(req, res, id);
+      db.exec("COMMIT");
+    } catch (e) {
+      db.exec("ROLLBACK");
+      throw e;
+    }
+    res.status(201).json({ isGuest: true });
+  });
   app.get("/api/health", (_req, res) =>
     res.json({ ok: true, assessmentConfigured: !!apiKey }),
   );
@@ -190,7 +236,11 @@ export function createApp({
   });
   app.post("/api/auth/login", authLimit, async (req, res) => {
     const { email, password } = credentials.parse(req.body);
-    const user = db.prepare("SELECT * FROM users WHERE email=?").get(email);
+    const user = db
+      .prepare(
+        "SELECT * FROM users WHERE email=? AND NOT EXISTS(SELECT 1 FROM guest_users WHERE user_id=users.id)",
+      )
+      .get(email);
     const [salt, expected] = (
       user?.password ?? `${"0".repeat(32)}:${"0".repeat(128)}`
     ).split(":");
@@ -201,11 +251,7 @@ export function createApp({
     res.json({ email: user.email });
   });
   app.use("/api", (req, _res, next) => {
-    const user = db
-      .prepare(
-        "SELECT users.* FROM auth JOIN users ON users.id=auth.user_id WHERE token=? AND expires>?",
-      )
-      .get(hashToken(getToken(req)), Date.now());
+    const user = currentUser(req);
     if (!user) return next(new ApiError(401, "Please sign in to continue."));
     req.user = user;
     next();
@@ -227,7 +273,8 @@ export function createApp({
       .map((r) => JSON.parse(r.body));
     res.json({
       ...JSON.parse(req.user.workspace),
-      email: req.user.email,
+      email: req.user.isGuest ? null : req.user.email,
+      isGuest: !!req.user.isGuest,
       sessions: sessions
         .filter((s) => s.status === "completed")
         .map(publicSession),

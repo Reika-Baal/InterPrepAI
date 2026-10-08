@@ -59,6 +59,7 @@ export default function App() {
       <Route
         element={
           <Layout
+            isGuest={backend.isGuest}
             name={profile.name}
             storageError={backend.error}
             retry={() => void backend.retry()}
@@ -134,6 +135,7 @@ export default function App() {
           path="/settings"
           element={
             <Settings
+              isGuest={backend.isGuest}
               profile={profile}
               save={(profile) =>
                 backend.update({ ...backend.current.current, profile })

@@ -41,7 +41,7 @@ export default function Feedback({ sessions }: { sessions: Session[] }) {
             <div>
               <h2>{s.topic}</h2>
               <p>
-                {s.answers.length} answers assessed and saved to your account.
+                {s.answers.length} answers assessed and saved to your workspace.
               </p>
               <Link className="text-link" to="/practice">
                 Practise again →

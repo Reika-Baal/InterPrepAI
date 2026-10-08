@@ -12,15 +12,19 @@ export function useBackend() {
     [status, setStatus] = useState<"loading" | "ready" | "auth" | "error">(
       "loading",
     ),
-    [error, setError] = useState("");
+    [error, setError] = useState(""),
+    [isGuest, setIsGuest] = useState(false);
   const current = useRef(workspace),
     queue = useRef<Promise<unknown>>(Promise.resolve());
   async function load() {
     try {
-      const d = await api<Workspace & { sessions: Session[] }>("/workspace");
+      const d = await api<
+        Workspace & { sessions: Session[]; isGuest: boolean }
+      >("/workspace");
       current.current = d;
       setWorkspace(d);
       setSessions(d.sessions);
+      setIsGuest(d.isGuest);
       setStatus("ready");
       setError("");
     } catch (e) {
@@ -76,6 +80,7 @@ export function useBackend() {
       setWorkspace(empty);
       setSessions([]);
       setStatus("auth");
+      setIsGuest(false);
       setError("");
     } catch (e) {
       setError((e as Error).message);
@@ -83,6 +88,7 @@ export function useBackend() {
   }
   return {
     workspace,
+    isGuest,
     current,
     sessions,
     setSessions,

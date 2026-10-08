@@ -12,7 +12,8 @@ export function openDb(path) {
  CREATE TABLE IF NOT EXISTS sessions(id TEXT PRIMARY KEY,user_id TEXT REFERENCES users(id) ON DELETE CASCADE,body TEXT NOT NULL);
  CREATE INDEX IF NOT EXISTS sessions_owner ON sessions(user_id);
  CREATE TABLE IF NOT EXISTS usage(day TEXT NOT NULL,scope TEXT NOT NULL,count INTEGER NOT NULL,PRIMARY KEY(day,scope));
- PRAGMA user_version=1;`);
+ CREATE TABLE IF NOT EXISTS guest_users(user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, expires INTEGER NOT NULL);
+ PRAGMA user_version=2;`);
   const seed = db.prepare(
     "INSERT INTO questions(id,body) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET body=excluded.body",
   );

@@ -145,7 +145,7 @@ export default function Practice({ save }: { save: (s: Session) => void }) {
           {topics.map((t) => (
             <Panel key={t.name}>
               <h2>{t.name}</h2>
-              <p>5 questions · self-paced · saved to your account</p>
+              <p>5 questions · self-paced · saved to your workspace</p>
               <button
                 className="btn primary"
                 disabled={!!busy}

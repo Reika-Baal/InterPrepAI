@@ -160,7 +160,7 @@ export default function Landing() {
             <div>
               <div className="section-label">START WHERE YOU ARE</div>
               <h2>Your preparation, all in one place.</h2>
-              <p>Create an account to save your practice and progress.</p>
+              <p>Try all features as a guest, or create an account to keep your progress across devices.</p>
               <div className="pricing-points">
                 <span>
                   <Check size={16} /> Interview planner

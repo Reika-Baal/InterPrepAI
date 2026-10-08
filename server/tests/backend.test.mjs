@@ -469,21 +469,141 @@ test("Previously registered passwords still work without confirmation or new-pol
     c = f.client(),
     salt = "legacy-test-salt",
     password = "legacy-password";
-  f.db
-    .prepare("INSERT INTO users VALUES(?,?,?,?)")
-    .run(
-      "legacy",
-      "legacy@example.com",
-      salt + ":" + scryptSync(password, salt, 64).toString("hex"),
-      JSON.stringify({
-        profile: { name: "Legacy", role: "" },
-        tasks: [false, false, false],
-        interviews: [],
-      }),
-    );
+  f.db.prepare("INSERT INTO users VALUES(?,?,?,?)").run(
+    "legacy",
+    "legacy@example.com",
+    salt + ":" + scryptSync(password, salt, 64).toString("hex"),
+    JSON.stringify({
+      profile: { name: "Legacy", role: "" },
+      tasks: [false, false, false],
+      interviews: [],
+    }),
+  );
   assert.equal(
     (await c("/auth/login", "POST", { email: "legacy@example.com", password }))
       .status,
     200,
   );
+});
+
+test("Guests access every workspace feature with isolated persistent identity and the same assessment limits", async (t) => {
+  const f = await fixture(t, {
+      registrationCode: "accounts-only-code",
+      userDailyLimit: 5,
+    }),
+    a = f.client(),
+    b = f.client();
+  assert.equal(
+    (await a("/auth/guest", "POST", {}, { origin: "https://evil.example" }))
+      .status,
+    403,
+  );
+  const entry = await a("/auth/guest", "POST", {});
+  assert.equal(entry.status, 201);
+  assert.match(entry.cookie, /HttpOnly/);
+  assert.match(entry.cookie, /SameSite=Strict/);
+  await b("/auth/guest", "POST", {});
+  const w = (await a("/workspace")).data;
+  assert.equal(w.isGuest, true);
+  assert.equal(w.email, null);
+  assert.equal(w.profile.name, "Guest");
+  const guestId = f.db
+    .prepare("SELECT user_id FROM guest_users ORDER BY rowid")
+    .get().user_id;
+  const guestEmail = f.db
+    .prepare("SELECT email FROM users WHERE id=?")
+    .get(guestId).email;
+  assert.equal(
+    (await a("/auth/login", "POST", { email: guestEmail, password: "Zebra!7" }))
+      .status,
+    401,
+  );
+  const workspace = {
+    profile: { name: "Guest Tester", role: "Engineer" },
+    tasks: [true, false, true],
+    interviews: [
+      {
+        id: "guest-interview",
+        company: "Example",
+        role: "Engineer",
+        date: "2026-10-20",
+        time: "12:00",
+        location: "Online",
+        type: "Technical",
+        notes: "Prepare",
+        status: "Upcoming",
+      },
+    ],
+  };
+  assert.equal((await a("/workspace", "PUT", workspace)).status, 200);
+  assert.equal(
+    (await a("/auth/guest", "POST", {})).status,
+    200,
+    "repeat guest entry should reuse the identity",
+  );
+  assert.equal((await a("/workspace")).data.profile.name, "Guest Tester");
+  assert.equal((await b("/workspace")).data.interviews.length, 0);
+  assert.equal((await a("/topics")).status, 200);
+  const s = (await a("/sessions", "POST", { topic: bank[0].topic })).data;
+  assert.equal(
+    (
+      await b(`/sessions/${s.id}/answer`, "PUT", {
+        index: 0,
+        answer: "wrong owner",
+      })
+    ).status,
+    404,
+  );
+  for (let i = 0; i < 5; i++) {
+    await a(`/sessions/${s.id}/answer`, "PUT", {
+      index: i,
+      answer: "Guest answer.",
+    });
+    assert.equal(
+      (await a(`/sessions/${s.id}/assess`, "POST", { index: i })).status,
+      200,
+    );
+  }
+  assert.equal((await a("/sessions/active")).data.id, s.id);
+  assert.equal((await a(`/sessions/${s.id}/complete`, "POST", {})).status, 200);
+  assert.equal((await a("/workspace")).data.sessions.length, 1);
+  assert.equal((await b("/workspace")).data.sessions.length, 0);
+  const next = (await a("/sessions", "POST", { topic: bank[0].topic })).data;
+  await a(`/sessions/${next.id}/answer`, "PUT", {
+    index: 0,
+    answer: "Another answer.",
+  });
+  assert.equal(
+    (await a(`/sessions/${next.id}/assess`, "POST", { index: 0 })).status,
+    429,
+  );
+  assert.equal((await a("/workspace/reset", "POST", {})).status, 200);
+  assert.equal((await a("/workspace")).data.sessions.length, 0);
+  await a("/auth/logout", "POST", {});
+  assert.equal((await a("/workspace")).status, 401);
+  await a("/auth/guest", "POST", {});
+  assert.equal((await a("/workspace")).data.profile.name, "Guest");
+});
+
+test("Guest entry preserves signed-in accounts and cleans up expired guest data only", async (t) => {
+  const f = await fixture(t),
+    member = f.client(),
+    guest = f.client();
+  await register(member);
+  assert.equal((await member("/auth/guest", "POST", {})).data.isGuest, false);
+  await guest("/auth/guest", "POST", {});
+  const id = f.db.prepare("SELECT user_id FROM guest_users").get().user_id;
+  f.db
+    .prepare("UPDATE guest_users SET expires=? WHERE user_id=?")
+    .run(Date.now() - 1, id);
+  f.db
+    .prepare("UPDATE auth SET expires=? WHERE user_id=?")
+    .run(Date.now() - 1, id);
+  await f.client()("/auth/guest", "POST", {});
+  assert.equal(
+    f.db.prepare("SELECT id FROM users WHERE id=?").get(id),
+    undefined,
+  );
+  assert.equal((await guest("/workspace")).status, 401);
+  assert.equal((await member("/workspace")).data.isGuest, false);
 });
