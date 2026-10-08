@@ -15,6 +15,7 @@ import { resolve } from "node:path";
 import { existsSync } from "node:fs";
 import { ApiError, createAssessor } from "./assessment.mjs";
 import { emptyWorkspace } from "./db.mjs";
+import { registrationPasswordError } from "../shared/password-policy.mjs";
 const derive = promisify(scrypt);
 const hashToken = (t) => createHash("sha256").update(t).digest("hex");
 const credentials = z
@@ -23,10 +24,19 @@ const credentials = z
       .email()
       .max(254)
       .transform((s) => s.toLowerCase()),
-    password: z.string().min(12).max(128),
+    password: z.string().min(1).max(128),
     accessCode: z.string().max(200).optional(),
   })
   .strict();
+const registrationCredentials = credentials.extend({
+  name: z
+    .string()
+    .trim()
+    .min(1)
+    .max(60)
+    .refine((value) => /\p{L}/u.test(value)),
+  confirmPassword: z.string().max(128),
+});
 const interview = z
   .object({
     id: z.string().min(1).max(100),
@@ -147,7 +157,14 @@ export function createApp({
     res.json({ ok: true, assessmentConfigured: !!apiKey }),
   );
   app.post("/api/auth/register", authLimit, async (req, res) => {
-    const { email, password, accessCode } = credentials.parse(req.body);
+    const { email, password, accessCode, name, confirmPassword } =
+      registrationCredentials.parse(req.body);
+    const policyError = registrationPasswordError(
+      password,
+      confirmPassword,
+      name,
+    );
+    if (policyError) throw new ApiError(400, policyError);
     if (registrationCode && accessCode !== registrationCode)
       throw new ApiError(403, "A valid registration code is required.");
     const salt = randomBytes(16).toString("hex");
@@ -158,7 +175,7 @@ export function createApp({
         id,
         email,
         `${salt}:${key.toString("hex")}`,
-        JSON.stringify(emptyWorkspace()),
+        JSON.stringify({ ...emptyWorkspace(), profile: { name, role: "" } }),
       );
     } catch (e) {
       if (e.code === "ERR_SQLITE_ERROR" && String(e.message).includes("UNIQUE"))
@@ -431,16 +448,14 @@ export function createApp({
   app.use((err, _req, res, _next) => {
     const status = err instanceof z.ZodError ? 400 : (err.status ?? 500);
     if (status === 500) console.error("Server request failed:", err.name); // Never log candidate answers, credentials or provider headers.
-    res
-      .status(status)
-      .json({
-        error:
-          err instanceof z.ZodError
-            ? "Invalid request data. Check the field lengths and values."
-            : status >= 500 && !(err instanceof ApiError)
-              ? "A server error occurred. Please try again."
-              : err.message,
-      });
+    res.status(status).json({
+      error:
+        err instanceof z.ZodError
+          ? "Invalid request data. Check the field lengths and values."
+          : status >= 500 && !(err instanceof ApiError)
+            ? "A server error occurred. Please try again."
+            : err.message,
+    });
   });
   return app;
 }

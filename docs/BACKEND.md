@@ -21,7 +21,7 @@ All mutation requests require `Content-Type: application/json` and `Origin` matc
 | Method | Route | Use |
 | --- | --- | --- |
 | GET | /api/health | Availability and whether AI is configured |
-| POST | /api/auth/register | email, password, optional accessCode |
+| POST | /api/auth/register | name, email, password, confirmPassword, optional accessCode |
 | POST | /api/auth/login | email and password |
 | POST | /api/auth/logout | Revoke current session |
 | GET/PUT | /api/workspace | Read state / save profile, interviews, tasks |
@@ -69,3 +69,12 @@ No email verification, password-reset email, MFA, billing, account deletion UI, 
 `npm test` uses a stubbed provider to exercise transport, ownership, score calculation, response validation and failure handling without charges. Passing these tests does not establish AI accuracy.
 
 `npm run eval:live` makes five real provider calls: correct binary search, false binary search, a prompt-injection attempt, an alternative cycle detection algorithm and Java equality. It checks broad score ranges. Run it with your configured model/key and inspect explanations before release. It is a starter evaluation, not a comprehensive quality benchmark.
+
+
+## Registration password policy
+
+Registration requires name, password and confirmPassword. Both the form and API use `shared/password-policy.mjs`: at least 7 Unicode characters, a capital letter and a punctuation/symbol character. Spaces alone do not count as symbols. The existing maximum is 128 UTF-16 code units. Password confirmation must match exactly. Passwords are hashed exactly as entered; they are not trimmed or normalised for authentication.
+
+The supplied list of 20 common passwords is checked first, ignoring case and outer whitespace, so these inputs receive exactly `Password is too common`. This is an exact blocklist, not a comprehensive dictionary or a check for every possible variation. Name matching ignores case and punctuation and checks the full name and name parts of two or more characters; individual initials in multi-part names are ignored. The supplied registration name becomes the initial profile name. This check uses the user's supplied name, not independently verified identity.
+
+New registration rules are not applied during sign-in, so existing accounts keep working. Profile name edits do not retroactively validate an existing password. No schema migration or password reset is required.

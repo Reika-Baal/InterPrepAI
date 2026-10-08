@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api";
+import { registrationPasswordError } from "../../shared/password-policy.mjs";
 import { Panel, Logo } from "../components/UI";
 export default function Auth({
   onSuccess,
@@ -20,13 +21,30 @@ export default function Auth({
           onSubmit={async (e) => {
             e.preventDefault();
             const d = new FormData(e.currentTarget);
-            setBusy(true);
             setError("");
+            if (register) {
+              const validationError = registrationPasswordError(
+                String(d.get("password")),
+                String(d.get("confirmPassword")),
+                String(d.get("name")),
+              );
+              if (validationError) {
+                setError(validationError);
+                return;
+              }
+            }
+            setBusy(true);
             try {
               await api("/auth/" + (register ? "register" : "login"), "POST", {
                 email: d.get("email"),
                 password: d.get("password"),
-                ...(register ? { accessCode: d.get("accessCode") } : {}),
+                ...(register
+                  ? {
+                      accessCode: d.get("accessCode"),
+                      name: d.get("name"),
+                      confirmPassword: d.get("confirmPassword"),
+                    }
+                  : {}),
               });
               await onSuccess();
             } catch (e) {
@@ -36,6 +54,18 @@ export default function Auth({
             }
           }}
         >
+          {register && (
+            <label>
+              Your name
+              <input
+                name="name"
+                autoComplete="name"
+                required
+                maxLength={60}
+                pattern=".*\S.*"
+              />
+            </label>
+          )}
           <label>
             Email
             <input
@@ -49,15 +79,34 @@ export default function Auth({
           <label>
             Password
             <input
+              aria-describedby={register ? "password-requirements" : undefined}
               name="password"
               type="password"
               autoComplete={register ? "new-password" : "current-password"}
               required
-              minLength={12}
               maxLength={128}
             />
           </label>
-          <small>At least 12 characters.</small>
+          {register && (
+            <>
+              <small id="password-requirements">
+                At least 7 characters, including a capital letter and a special
+                symbol (such as !, @ or #). Must not contain your name or be a
+                common password.
+              </small>
+              <label>
+                Confirm password
+                <input
+                  name="confirmPassword"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  maxLength={128}
+                  aria-describedby="password-requirements"
+                />
+              </label>
+            </>
+          )}
           {register && (
             <label>
               Registration code (if required)

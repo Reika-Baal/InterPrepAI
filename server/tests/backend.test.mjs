@@ -73,7 +73,9 @@ async function fixture(t, options = {}) {
 const register = (c) =>
   c("/auth/register", "POST", {
     email: `${crypto.randomUUID()}@example.com`,
-    password: "safe-test-password",
+    password: "Safe-test-password!",
+    confirmPassword: "Safe-test-password!",
+    name: "Example User",
   });
 test("Accounts, ownership, persisted drafts, rubric privacy, scoring, invalidation and logout", async (t) => {
   const f = await fixture(t),
@@ -89,7 +91,7 @@ test("Accounts, ownership, persisted drafts, rubric privacy, scoring, invalidati
     (
       await a("/auth/login", "POST", {
         email: "nobody@example.com",
-        password: "safe-test-password",
+        password: "Safe-test-password!",
       })
     ).status,
     401,
@@ -329,10 +331,28 @@ test("Concurrent reviews cannot double-bill or race draft edits; sign-in restore
   const c = f.client();
   const credentials = {
     email: "persist@example.com",
-    password: "safe-test-password",
+    password: "Safe-test-password!",
   };
-  assert.equal((await c("/auth/register", "POST", credentials)).status, 201);
-  assert.equal((await c("/auth/register", "POST", credentials)).status, 409);
+  assert.equal(
+    (
+      await c("/auth/register", "POST", {
+        ...credentials,
+        name: "Example User",
+        confirmPassword: credentials.password,
+      })
+    ).status,
+    201,
+  );
+  assert.equal(
+    (
+      await c("/auth/register", "POST", {
+        ...credentials,
+        name: "Example User",
+        confirmPassword: credentials.password,
+      })
+    ).status,
+    409,
+  );
   const stored = f.db
     .prepare("SELECT password FROM users WHERE email=?")
     .get(credentials.email).password;
@@ -362,4 +382,108 @@ test("Concurrent reviews cannot double-bill or race draft edits; sign-in restore
   assert.equal((await c("/sessions/active")).data.answers[0], "Saved answer");
   await c("/workspace/reset", "POST", {});
   assert.equal((await c("/sessions/active")).data, null);
+});
+
+test("Registration policy checks all common passwords and required conditions", async () => {
+  const { COMMON_PASSWORDS, passwordError, registrationPasswordError } =
+    await import("../../shared/password-policy.mjs");
+  for (const p of COMMON_PASSWORDS) {
+    assert.equal(passwordError(p, "Example User"), "Password is too common");
+    assert.equal(
+      passwordError(p.toUpperCase(), "Example User"),
+      "Password is too common",
+    );
+  }
+  assert.match(passwordError("Ab!12", "Example User"), /7 characters/);
+  assert.match(passwordError("abcdef!", "Example User"), /capital/);
+  assert.match(passwordError("Abcdefg", "Example User"), /special symbol/);
+  assert.match(passwordError("Abcdef ", "Example User"), /special symbol/);
+  assert.match(passwordError("PRATIK!7", "Pratik Deuchand"), /your name/);
+  assert.match(passwordError("P-r-a-t-i-k!7", "Pratik Deuchand"), /your name/);
+  assert.match(passwordError("Deuchand!7", "Pratik Deuchand"), /your name/);
+  assert.match(passwordError("Élodie!7", "Élodie Martin"), /your name/);
+  assert.equal(passwordError("Zebra!7", "Example User"), "");
+  assert.equal(
+    registrationPasswordError("Zebra!7", "Zebra!8", "Example User"),
+    "Passwords do not match.",
+  );
+  assert.equal(
+    registrationPasswordError("Zebra!7", "Zebra!7", "Example User"),
+    "",
+  );
+});
+
+test("API enforces registration rules, saves name, and accepts seven-character passwords", async (t) => {
+  const f = await fixture(t),
+    c = f.client();
+  const base = {
+    email: "policy@example.com",
+    name: "Pratik Deuchand",
+    password: "Zebra!7",
+    confirmPassword: "Zebra!7",
+  };
+  for (const [password, expected] of [
+    ["Password1", "Password is too common"],
+    ["Pratik!7", "Password must not include your name."],
+    ["abcdef!", "Password must include a capital letter."],
+    ["Abcdefg", "Password must include a special symbol."],
+    ["Ab!123", "Password must have at least 7 characters."],
+  ]) {
+    const r = await c("/auth/register", "POST", {
+      ...base,
+      password,
+      confirmPassword: password,
+    });
+    assert.equal(r.status, 400);
+    assert.equal(r.data.error, expected);
+  }
+  assert.equal(
+    (await c("/auth/register", "POST", { ...base, confirmPassword: "wrong" }))
+      .data.error,
+    "Passwords do not match.",
+  );
+  const { confirmPassword, ...missingConfirmation } = base;
+  assert.equal(
+    (await c("/auth/register", "POST", missingConfirmation)).status,
+    400,
+  );
+  assert.equal((await c("/auth/register", "POST", base)).status, 201);
+  assert.equal((await c("/workspace")).data.profile.name, base.name);
+  const row = f.db.prepare("SELECT * FROM users WHERE email=?").get(base.email);
+  assert.ok(!JSON.stringify(row).includes(base.password));
+  await c("/auth/logout", "POST", {});
+  assert.equal(
+    (
+      await c("/auth/login", "POST", {
+        email: base.email,
+        password: base.password,
+      })
+    ).status,
+    200,
+  );
+});
+
+test("Previously registered passwords still work without confirmation or new-policy checks", async (t) => {
+  const { scryptSync } = await import("node:crypto");
+  const f = await fixture(t),
+    c = f.client(),
+    salt = "legacy-test-salt",
+    password = "legacy-password";
+  f.db
+    .prepare("INSERT INTO users VALUES(?,?,?,?)")
+    .run(
+      "legacy",
+      "legacy@example.com",
+      salt + ":" + scryptSync(password, salt, 64).toString("hex"),
+      JSON.stringify({
+        profile: { name: "Legacy", role: "" },
+        tasks: [false, false, false],
+        interviews: [],
+      }),
+    );
+  assert.equal(
+    (await c("/auth/login", "POST", { email: "legacy@example.com", password }))
+      .status,
+    200,
+  );
 });
