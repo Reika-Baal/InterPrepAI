@@ -53,7 +53,7 @@ export function Ring({
             <stop offset="1" stopColor="#22d3ee" />
           </linearGradient>
         </defs>
-        <circle cx="60" cy="60" r="49" stroke="#202638" />
+        <circle cx="60" cy="60" r="49" stroke="var(--ring-track)" />
         <circle
           cx="60"
           cy="60"

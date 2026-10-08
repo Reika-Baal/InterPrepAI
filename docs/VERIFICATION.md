@@ -32,3 +32,11 @@ The Three.js ribbon/particle scene is retained. Previous rendering checks covere
 - Existing registered sessions remain registered when the guest entry endpoint is called.
 - Chromium checks pass for guest entry, saved draft reload, five reviews and completion, feedback reload, profile updates, interviews, progress, dashboard, mobile layout and exit. The AI provider is stubbed in these checks.
 - Guest entry screenshot visually inspected; production build passes.
+
+
+## Theme toggle update
+
+- Build passes with a moon/sun toggle beside the profile avatar.
+- Chromium checks cover icon changes, adjacency, light form/dialog styling, persisted theme after refresh, mobile overflow, keyboard operation, return to dark mode and unavailable browser storage.
+- Desktop light dashboard screenshot visually inspected; mobile preview also captured.
+- Shared CSS variables cover chart axes, tooltips and ring tracks; light palette covers workspace, authentication and landing surfaces.

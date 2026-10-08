@@ -1,4 +1,9 @@
 :root {
+  color-scheme: dark;
+  --chart-grid: #25283a;
+  --chart-axis: #9a9eb3;
+  --chart-tooltip: #151826;
+  --ring-track: #202638;
   --background: #0a0b10;
   --surface: #11131a;
   --card: #1e2230;

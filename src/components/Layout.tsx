@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "./UI";
+import ThemeToggle from "./ThemeToggle";
 const links = [
   { path: "/dashboard", label: "Dashboard", icon: House },
   { path: "/interviews", label: "My Interviews", icon: CalendarDays },
@@ -93,9 +94,16 @@ export default function Layout({
           <span>
             <span className="online-dot" /> Your next chapter starts here
           </span>
-          <Link to="/settings" className="avatar" aria-label="Profile settings">
-            {name.slice(0, 1).toUpperCase() || "P"}
-          </Link>
+          <div className="workspace-actions">
+            <ThemeToggle />
+            <Link
+              to="/settings"
+              className="avatar"
+              aria-label="Profile settings"
+            >
+              {name.slice(0, 1).toUpperCase() || "P"}
+            </Link>
+          </div>
         </div>
         {storageError && (
           <p className="notice" role="alert">

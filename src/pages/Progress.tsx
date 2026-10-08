@@ -82,30 +82,30 @@ export default function Progress({
                     <stop offset="100%" stopColor="#8060ff" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid stroke="#25283a" vertical={false} />
+                <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
                 <XAxis
                   dataKey="session"
-                  stroke="#9a9eb3"
+                  stroke="var(--chart-axis)"
                   tickLine={false}
                   label={{
                     value: "Session",
                     position: "insideBottom",
                     offset: -8,
-                    fill: "#9a9eb3",
+                    fill: "var(--chart-axis)",
                   }}
                 />
                 <YAxis
                   domain={[0, 100]}
-                  stroke="#9a9eb3"
+                  stroke="var(--chart-axis)"
                   tickLine={false}
                   width={36}
                 />
                 <Tooltip
                   contentStyle={{
-                    background: "#151826",
-                    border: "1px solid #34384e",
+                    background: "var(--chart-tooltip)",
+                    border: "1px solid var(--border)",
                     borderRadius: 12,
-                    color: "#f5f7fb",
+                    color: "var(--text)",
                   }}
                   labelFormatter={(v) => `Session ${v}`}
                 />

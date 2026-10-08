@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="00f127ec-71ea-40d3-96f3-d35dce9c4d5f" name="Changes" comment="" />
+    <list default="true" id="00f127ec-71ea-40d3-96f3-d35dce9c4d5f" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/docs/VERIFICATION.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/VERIFICATION.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/UI.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/UI.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/Progress.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/Progress.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/theme.css" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
